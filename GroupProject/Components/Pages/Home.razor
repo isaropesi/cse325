@@ -1,7 +1,26 @@
-﻿@page "/"
+@page "/"
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Welcome to Budget4U</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="b4u-landing">
+    <h1>Take Control of Your Money.</h1>
+    <p>Budget4U helps you track spending, set limits, and reach your financial goals with absolute privacy.</p>
+    
+    <div class="b4u-landing-actions">
+        <a href="/register" class="btn-primary-b4u" style="font-size: 1.1rem; padding: .75rem 2rem;">Create Free Account</a>
+        <a href="/login" class="btn-outline-b4u" style="font-size: 1.1rem; padding: .75rem 2rem;">Sign In</a>
+    </div>
+</div>
 
-Welcome to your new app.
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            NavigationManager.NavigateTo("/dashboard");
+        }
+    }
+}

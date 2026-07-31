@@ -1,0 +1,29 @@
+@page "/dashboard"
+@attribute [Authorize]
+
+<PageTitle>Dashboard - Budget4U</PageTitle>
+
+<div class="b4u-page-header">
+    <h1>Dashboard</h1>
+    <p>Welcome back! Here's your financial summary for this month.</p>
+</div>
+
+<div class="b4u-stats-grid">
+    <div class="b4u-card">
+        <div class="b4u-card-title">Total Income</div>
+        <div class="b4u-stat-value" style="color: var(--success)">R$ 0.00</div>
+    </div>
+    <div class="b4u-card">
+        <div class="b4u-card-title">Total Expenses</div>
+        <div class="b4u-stat-value" style="color: var(--danger)">R$ 0.00</div>
+    </div>
+    <div class="b4u-card">
+        <div class="b4u-card-title">Net Balance</div>
+        <div class="b4u-stat-value">R$ 0.00</div>
+    </div>
+</div>
+
+<div class="b4u-card">
+    <div class="b4u-card-title">Budget Progress</div>
+    <p class="b4u-text-muted">Detailed budget tracking will be implemented in Week 5.</p>
+</div>

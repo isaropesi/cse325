@@ -1,23 +1,45 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<div class="b4u-wrapper">
+    <!-- Top Navigation Bar -->
+    <header class="b4u-header">
+        <a href="/" class="b4u-brand">
+            <span class="b4u-logo-icon">💰</span>
+            <span class="b4u-logo-text">Budget<strong>4U</strong></span>
+        </a>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <nav class="b4u-nav">
+            <AuthorizeView>
+                <Authorized>
+                    <NavLink href="/dashboard" class="b4u-nav-link" ActiveClass="active">
+                        📊 Dashboard
+                    </NavLink>
+                    <NavLink href="/transactions" class="b4u-nav-link" ActiveClass="active">
+                        💳 Transactions
+                    </NavLink>
+                    <NavLink href="/categories" class="b4u-nav-link" ActiveClass="active">
+                        🏷️ Categories
+                    </NavLink>
+                    <div class="b4u-nav-divider"></div>
+                    <span class="b4u-user-name">👤 @context.User.Identity?.Name</span>
+                    <a href="/logout" class="b4u-btn-outline">Sign Out</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login" class="b4u-nav-link">Sign In</a>
+                    <a href="/register" class="b4u-btn-primary">Get Started</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </nav>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <!-- Page Content -->
+    <main class="b4u-main">
+        @Body
     </main>
-</div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <!-- Footer -->
+    <footer class="b4u-footer">
+        <p>Budget4U &mdash; Isabella Rodrigues Pereira da Silva &mdash; Brazil</p>
+        <p class="b4u-footer-sub">&copy; @DateTime.Now.Year · CSE 325 Group Project</p>
+    </footer>
 </div>

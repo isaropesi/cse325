@@ -1,26 +1,71 @@
 using GroupProject.Components;
+using Budget4U.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// --- Database ---
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? "Data Source=budget4u.db";
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+// --- ASP.NET Core Identity ---
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    // Relaxed password rules for development convenience
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+// Identity redirects
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/access-denied";
+});
+
+// --- Blazor ---
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Allow Razor Pages for Identity UI scaffolded pages
+builder.Services.AddRazorPages();
+
+// Cascade auth state to Blazor components
+builder.Services.AddCascadingAuthenticationState();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// --- Migrate & seed database on startup ---
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
+
+// --- HTTP pipeline ---
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
-app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
 app.UseAntiforgery();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
+app.MapRazorPages();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
