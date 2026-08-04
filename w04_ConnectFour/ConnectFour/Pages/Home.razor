@@ -55,7 +55,7 @@
             <div class="board-row">
                 @for (var j = 0; j < 7; j++)
                 {
-                    var piece = pieces[i, j];
+                    var piece = pieces[i, j] ?? "";
                     <div class="cell">
                         <div class="piece @piece"></div>
                     </div>

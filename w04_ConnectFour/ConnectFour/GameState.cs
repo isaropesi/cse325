@@ -167,7 +167,7 @@ public class GameState
 		var landingSpot = column;
 		for (var i = column; i < 42; i += 7)
 		{
-			if (TheBoard[landingSpot + 7] != 0) break;
+			if (landingSpot + 7 >= 42 || TheBoard[landingSpot + 7] != 0) break;
 			landingSpot = i;
 		}
 
