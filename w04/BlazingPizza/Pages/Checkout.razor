@@ -1,0 +1,41 @@
+@page "/checkout"
+@inject OrderState OrderState
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<div class="main">
+    <EditForm Model="OrderState.Order.DeliveryAddress" OnValidSubmit="PlaceOrder">
+        <div class="checkout-cols">
+            <div class="checkout-order-details">
+                <h4>Review order</h4>
+                <OrderReview Order="OrderState.Order" />
+            </div>
+
+            <div class="checkout-delivery-address">
+                <h4>Deliver to...</h4>
+                @if (isError) {
+                    <div class="alert alert-danger">Please enter a name and address.</div>
+                }
+                <AddressEditor Address="OrderState.Order.DeliveryAddress" />
+            </div>
+        </div>
+
+        <button class="checkout-button btn btn-warning" type="Submit" disabled=@isError>
+            Place order
+        </button>
+        <DataAnnotationsValidator />
+    </EditForm>
+</div>
+
+@code {
+    bool isError = false;
+
+    private async Task PlaceOrder()
+    {
+        isError = false;
+        var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "orders", OrderState.Order);
+        var newOrderId= await response.Content.ReadFromJsonAsync<int>();
+        OrderState.ResetOrder();
+        NavigationManager.NavigateTo($"myorders/{newOrderId}");
+    }
+}
