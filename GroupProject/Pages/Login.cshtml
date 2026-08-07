@@ -1,0 +1,53 @@
+@page "/login"
+@model GroupProject.Pages.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — Budget4U</title>
+    <link rel="stylesheet" href="~/app.css" asp-append-version="true" />
+    <style>
+        body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); }
+        .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem 2rem; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+        .auth-logo { text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+        .auth-logo span { color: var(--primary); }
+        .auth-box h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; text-align: center; }
+        .auth-footer { text-align: center; margin-top: 1.25rem; font-size: 0.875rem; color: var(--text-muted); }
+        .error-msg { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="auth-box">
+        <div class="auth-logo">💰 Budget<span>4U</span></div>
+        <h2>Sign In</h2>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="error-msg">@Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            @Html.AntiForgeryToken()
+            <div class="b4u-form-group">
+                <label asp-for="Input.Email">Email</label>
+                <input asp-for="Input.Email" class="form-control" type="email" placeholder="you@example.com" autocomplete="email" />
+                <span asp-validation-for="Input.Email" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+            <div class="b4u-form-group">
+                <label asp-for="Input.Password">Password</label>
+                <input asp-for="Input.Password" class="form-control" type="password" placeholder="••••••" autocomplete="current-password" />
+                <span asp-validation-for="Input.Password" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+            <button type="submit" class="btn-primary-b4u" style="width: 100%; margin-top: 0.5rem; padding: 0.65rem;">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+            Don't have an account? <a href="/register">Create one</a>
+        </div>
+    </div>
+</body>
+</html>

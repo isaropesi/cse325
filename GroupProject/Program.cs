@@ -42,6 +42,10 @@ builder.Services.AddRazorPages();
 // Cascade auth state to Blazor components
 builder.Services.AddCascadingAuthenticationState();
 
+// --- Application Services ---
+builder.Services.AddScoped<Budget4U.Services.CategoryService>();
+builder.Services.AddScoped<Budget4U.Services.TransactionService>();
+
 var app = builder.Build();
 
 // --- Migrate & seed database on startup ---

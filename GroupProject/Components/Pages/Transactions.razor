@@ -1,13 +1,224 @@
 @page "/transactions"
 @attribute [Authorize]
+@inject Budget4U.Services.TransactionService TransactionService
+@inject Budget4U.Services.CategoryService CategoryService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Transactions - Budget4U</PageTitle>
 
-<div class="b4u-page-header">
-    <h1>Transactions</h1>
-    <p>Log your income and expenses.</p>
+<div class="b4u-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1>Transactions</h1>
+        <p>Log your income and expenses.</p>
+    </div>
+    <div style="background: var(--surface); padding: 0.5rem 1rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); display: flex; gap: 1rem; align-items: center;">
+        <div style="display: flex; flex-direction: column;">
+            <label style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Filter Month</label>
+            <input type="month" class="form-control" style="padding: 0.2rem 0.5rem;" @bind="filterDate" @bind:after="LoadData" />
+        </div>
+        <div style="border-left: 1px solid var(--border); padding-left: 1rem;">
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Net Balance</div>
+            <div style="font-weight: 700; color: @(monthlyBalance >= 0 ? "var(--success)" : "var(--danger)")">
+                R$ @monthlyBalance.ToString("N2")
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="b4u-alert b4u-alert-info">
-    <strong>Coming Soon!</strong> Full CRUD functionality for transactions will be implemented in Week 5.
+<div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+    <!-- Add/Edit Form -->
+    <div class="b4u-card" style="flex: 1; min-width: 320px;">
+        <div class="b4u-card-title">@(isEditing ? "Edit Transaction" : "Log Transaction")</div>
+        
+        <EditForm Model="@currentTransaction" OnValidSubmit="SaveTransaction">
+            <DataAnnotationsValidator />
+            
+            <div class="b4u-form-group">
+                <label>Type</label>
+                <InputSelect @bind-Value="currentTransaction.Type" class="form-control">
+                    <option value="@Budget4U.Data.TransactionType.Expense">Expense</option>
+                    <option value="@Budget4U.Data.TransactionType.Income">Income</option>
+                </InputSelect>
+            </div>
+
+            <div class="b4u-form-group">
+                <label>Amount (R$)</label>
+                <InputNumber @bind-Value="currentTransaction.Amount" class="form-control" placeholder="0.00" step="0.01" />
+                <ValidationMessage For="@(() => currentTransaction.Amount)" style="color: var(--danger); font-size: 0.8rem;" />
+            </div>
+
+            <div class="b4u-form-group">
+                <label>Date</label>
+                <InputDate @bind-Value="currentTransaction.Date" class="form-control" />
+            </div>
+
+            <div class="b4u-form-group">
+                <label>Category</label>
+                <InputSelect @bind-Value="currentTransaction.CategoryId" class="form-control">
+                    <option value="">-- No Category --</option>
+                    @if (categories != null)
+                    {
+                        foreach (var cat in categories)
+                        {
+                            <option value="@cat.Id">@cat.Name</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="b4u-form-group">
+                <label>Description</label>
+                <InputText @bind-Value="currentTransaction.Description" class="form-control" placeholder="Optional notes" />
+            </div>
+            
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                <button type="submit" class="btn-primary-b4u">Save</button>
+                @if (isEditing)
+                {
+                    <button type="button" class="btn-outline-b4u" @onclick="CancelEdit">Cancel</button>
+                }
+            </div>
+        </EditForm>
+    </div>
+
+    <!-- Transaction List -->
+    <div class="b4u-card" style="flex: 2; min-width: 400px;">
+        <div class="b4u-card-title">Transactions for @filterDate.ToString("MMMM yyyy")</div>
+        
+        @if (transactions == null)
+        {
+            <p>Loading...</p>
+        }
+        else if (transactions.Count == 0)
+        {
+            <p class="b4u-text-muted">No transactions found for this month.</p>
+        }
+        else
+        {
+            <table class="b4u-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in transactions)
+                    {
+                        <tr>
+                            <td>@t.Date.ToString("d MMM yyyy")</td>
+                            <td>
+                                @if (t.Type == Budget4U.Data.TransactionType.Income)
+                                {
+                                    <span class="b4u-badge badge-income">Income</span>
+                                }
+                                else
+                                {
+                                    <span class="b4u-badge badge-expense">Expense</span>
+                                }
+                            </td>
+                            <td>
+                                @if (t.Category != null)
+                                {
+                                    <span class="b4u-badge" style="background-color: @t.Category.Color">@t.Category.Name</span>
+                                }
+                                else
+                                {
+                                    <span class="b4u-text-muted">-</span>
+                                }
+                            </td>
+                            <td>@t.Description</td>
+                            <td style="font-weight: 600; color: @(t.Type == Budget4U.Data.TransactionType.Income ? "var(--success)" : "var(--text)")">
+                                R$ @t.Amount.ToString("N2")
+                            </td>
+                            <td>
+                                <button class="btn-outline-b4u" style="padding: 0.2rem 0.5rem; margin-right: 0.2rem;" @onclick="() => EditTransaction(t)">Edit</button>
+                                <button class="btn-danger-b4u" style="padding: 0.2rem 0.5rem;" @onclick="() => DeleteTransaction(t.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
 </div>
+
+@code {
+    private List<Budget4U.Data.Transaction>? transactions;
+    private List<Budget4U.Data.Category>? categories;
+    private Budget4U.Data.Transaction currentTransaction = new Budget4U.Data.Transaction { Date = DateTime.Today };
+    private string userId = string.Empty;
+    private bool isEditing = false;
+    
+    private DateTime filterDate = DateTime.Today;
+    private decimal monthlyBalance = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+        
+        if (!string.IsNullOrEmpty(userId))
+        {
+            currentTransaction.UserId = userId;
+            categories = await CategoryService.GetCategoriesAsync(userId);
+            await LoadData();
+        }
+    }
+
+    private async Task LoadData()
+    {
+        transactions = await TransactionService.GetTransactionsAsync(userId, filterDate.Month, filterDate.Year);
+        var totals = await TransactionService.GetMonthlyTotalsAsync(userId, filterDate.Month, filterDate.Year);
+        monthlyBalance = totals.Income - totals.Expense;
+    }
+
+    private async Task SaveTransaction()
+    {
+        if (string.IsNullOrEmpty(userId)) return;
+
+        if (isEditing)
+        {
+            await TransactionService.UpdateTransactionAsync(currentTransaction);
+            isEditing = false;
+        }
+        else
+        {
+            await TransactionService.AddTransactionAsync(currentTransaction);
+        }
+
+        currentTransaction = new Budget4U.Data.Transaction { UserId = userId, Date = filterDate };
+        await LoadData();
+    }
+
+    private void EditTransaction(Budget4U.Data.Transaction t)
+    {
+        currentTransaction = new Budget4U.Data.Transaction 
+        { 
+            Id = t.Id, 
+            UserId = t.UserId, 
+            Amount = t.Amount,
+            Date = t.Date,
+            Description = t.Description,
+            Type = t.Type,
+            CategoryId = t.CategoryId
+        };
+        isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        currentTransaction = new Budget4U.Data.Transaction { UserId = userId, Date = filterDate };
+        isEditing = false;
+    }
+
+    private async Task DeleteTransaction(int id)
+    {
+        await TransactionService.DeleteTransactionAsync(id, userId);
+        await LoadData();
+    }
+}

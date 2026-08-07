@@ -1,0 +1,20 @@
+@page "/logout"
+@model GroupProject.Pages.LogoutModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Signing out — Budget4U</title>
+    <meta http-equiv="refresh" content="0; url=/" />
+</head>
+<body>
+    <p>Signing out...</p>
+    <form method="post" id="logoutForm">
+        @Html.AntiForgeryToken()
+    </form>
+    <script>document.getElementById('logoutForm').submit();</script>
+</body>
+</html>

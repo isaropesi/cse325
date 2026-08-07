@@ -1,29 +1,154 @@
 @page "/dashboard"
 @attribute [Authorize]
+@inject Budget4U.Services.TransactionService TransactionService
+@inject Budget4U.Services.CategoryService CategoryService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Dashboard - Budget4U</PageTitle>
 
 <div class="b4u-page-header">
     <h1>Dashboard</h1>
-    <p>Welcome back! Here's your financial summary for this month.</p>
+    <p>Welcome back! Here's your financial summary for <strong>@DateTime.Now.ToString("MMMM yyyy")</strong>.</p>
 </div>
 
 <div class="b4u-stats-grid">
     <div class="b4u-card">
         <div class="b4u-card-title">Total Income</div>
-        <div class="b4u-stat-value" style="color: var(--success)">R$ 0.00</div>
+        <div class="b4u-stat-value" style="color: var(--success)">R$ @income.ToString("N2")</div>
     </div>
     <div class="b4u-card">
         <div class="b4u-card-title">Total Expenses</div>
-        <div class="b4u-stat-value" style="color: var(--danger)">R$ 0.00</div>
+        <div class="b4u-stat-value" style="color: var(--danger)">R$ @expense.ToString("N2")</div>
     </div>
     <div class="b4u-card">
         <div class="b4u-card-title">Net Balance</div>
-        <div class="b4u-stat-value">R$ 0.00</div>
+        <div class="b4u-stat-value" style="color: @(balance >= 0 ? "var(--success)" : "var(--danger)")">
+            R$ @balance.ToString("N2")
+        </div>
     </div>
 </div>
 
-<div class="b4u-card">
-    <div class="b4u-card-title">Budget Progress</div>
-    <p class="b4u-text-muted">Detailed budget tracking will be implemented in Week 5.</p>
+<div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+    
+    <!-- Budget Progress -->
+    <div class="b4u-card" style="flex: 2; min-width: 320px;">
+        <div class="b4u-card-title">Budget Progress (This Month)</div>
+        @if (budgetProgress == null || !budgetProgress.Any())
+        {
+            <p class="b4u-text-muted">No budget limits set. Go to <a href="/categories">Categories</a> to set them.</p>
+        }
+        else
+        {
+            foreach (var bp in budgetProgress)
+            {
+                var catColor = bp.CategoryColor ?? "var(--primary)";
+                var overBudget = bp.Spent > bp.Limit;
+                var progressPercent = bp.Limit > 0 ? Math.Min((double)(bp.Spent / bp.Limit) * 100, 100) : 0;
+                
+                <div style="margin-top: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; font-weight: 500; font-size: 0.9rem;">
+                        <span><span class="b4u-badge" style="background-color: @catColor; margin-right: 8px;">@bp.CategoryName</span></span>
+                        <span>R$ @bp.Spent.ToString("N2") / R$ @bp.Limit.ToString("N2")</span>
+                    </div>
+                    <div class="b4u-progress">
+                        <div class="b4u-progress-bar @(overBudget ? "over-budget" : "")" 
+                             style="width: @progressPercent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%; background-color: @(overBudget ? "var(--danger)" : catColor);"></div>
+                    </div>
+                    @if (overBudget)
+                    {
+                        <div style="color: var(--danger); font-size: 0.8rem; margin-top: 4px; font-weight: 500;">
+                            Over budget by R$ @((bp.Spent - bp.Limit).ToString("N2"))
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="b4u-card" style="flex: 1.5; min-width: 300px;">
+        <div class="b4u-card-title">Recent Transactions</div>
+        @if (recentTransactions == null || recentTransactions.Count == 0)
+        {
+            <p class="b4u-text-muted">No recent transactions.</p>
+        }
+        else
+        {
+            <table class="b4u-table">
+                <tbody>
+                    @foreach (var t in recentTransactions)
+                    {
+                        <tr>
+                            <td>
+                                <div>@t.Date.ToString("MMM d")</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    @(t.Category?.Name ?? "General")
+                                </div>
+                            </td>
+                            <td style="text-align: right; font-weight: 600; color: @(t.Type == Budget4U.Data.TransactionType.Income ? "var(--success)" : "var(--text)")">
+                                @(t.Type == Budget4U.Data.TransactionType.Income ? "+" : "-")R$ @t.Amount.ToString("N2")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="/transactions" class="btn-outline-b4u" style="text-decoration: none;">View All</a>
+            </div>
+        }
+    </div>
+
 </div>
+
+@code {
+    private decimal income = 0;
+    private decimal expense = 0;
+    private decimal balance => income - expense;
+    private List<Budget4U.Data.Transaction>? recentTransactions;
+    private List<BudgetProgressItem>? budgetProgress;
+
+    public class BudgetProgressItem
+    {
+        public string CategoryName { get; set; } = "";
+        public string CategoryColor { get; set; } = "";
+        public decimal Limit { get; set; }
+        public decimal Spent { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var today = DateTime.Today;
+            
+            // 1. Get Totals
+            var totals = await TransactionService.GetMonthlyTotalsAsync(userId, today.Month, today.Year);
+            income = totals.Income;
+            expense = totals.Expense;
+
+            // 2. Get Recent Transactions
+            recentTransactions = await TransactionService.GetRecentTransactionsAsync(userId, 5);
+
+            // 3. Calculate Budget Progress
+            var limits = await CategoryService.GetBudgetLimitsAsync(userId, today.Month, today.Year);
+            if (limits.Any())
+            {
+                var monthTransactions = await TransactionService.GetTransactionsAsync(userId, today.Month, today.Year);
+                budgetProgress = limits.Select(l => new BudgetProgressItem
+                {
+                    CategoryName = l.Category?.Name ?? "Unknown",
+                    CategoryColor = l.Category?.Color ?? "#ccc",
+                    Limit = l.LimitAmount,
+                    Spent = monthTransactions.Where(t => t.CategoryId == l.CategoryId && t.Type == Budget4U.Data.TransactionType.Expense).Sum(t => t.Amount)
+                }).ToList();
+            }
+            else 
+            {
+                budgetProgress = new List<BudgetProgressItem>();
+            }
+        }
+    }
+}

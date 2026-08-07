@@ -1,36 +1,62 @@
-# Budget Tracker (.NET Blazor Application)
+# 💰 Budget4U
 
-## Project Overview
-This is a collaborative semester-long group project developed using the **.NET Blazor** technology stack. The application is a **Personal Finance & Budget Tracker** designed to help users manage their financial health through budgeting, transaction tracking, and category analysis, all secured via user authentication.
+Budget4U is a comprehensive personal finance tracking application built with **Blazor Server** and **.NET 10**. It empowers users to take control of their finances with absolute privacy by tracking income, expenses, and setting monthly budgets.
 
-## Team Members
-*   **Isabella Silva**
+*Created by Isabella Silva for CSE 325.*
 
-## Key Features (Brainstormed / Proposed)
-1.  **User Authentication & Security**: Individual secure user registration and login, ensuring private personal financial portfolios.
-2.  **Transaction Management (CRUD)**: Create, Read, Update, and Delete capabilities for tracking daily expenses and income.
-3.  **Category Customization**: Custom categorization of spending (e.g., Food, Utilities, Entertainment) with visual status indicators.
-4.  **Budget Goal Setting**: Establish monthly budget limits per category with progress bars and alerts when limits are approached.
-5.  **Analytics & Visualization**: Interactive charts showing spending distributions and monthly income vs. expense trends.
+---
 
-## Technologies Used
-*   **.NET Core / Blazor Web App** (C#)
-*   **ASP.NET Core Identity** (for Authentication)
-*   **Entity Framework Core** (for database integration and CRUD operations)
-*   **SQLite / PostgreSQL** (database)
-*   **HTML5, CSS3, & Bootstrap / Tailwind** (responsive design and custom styling)
+## ✨ Features
 
-## How to Run Locally
-1. Navigate to the project directory:
-   ```bash
-   cd GroupProject
-   ```
-2. Restore dependencies:
-   ```bash
-   dotnet restore
-   ```
-3. Run the development server:
-   ```bash
-   dotnet run
-   ```
-4. Open your browser and navigate to the local server URL (typically `http://localhost:5000` or `https://localhost:5001`).
+- **User Authentication:** Secure registration and login powered by ASP.NET Core Identity. Data is isolated per user.
+- **Transactions Management:** Log, edit, and delete daily income and expenses.
+- **Spending Categories:** Create custom categories with color-coded badges to organize your spending.
+- **Monthly Budget Limits:** Set custom spending caps per category, per month.
+- **Live Dashboard:** A real-time overview of your finances including total income, total expenses, net balance, and visual progress bars showing how close you are to your budget limits.
+- **Transaction History Filter:** Filter your transaction history by specific months and years.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Framework:** .NET 10 / Blazor Server
+- **Authentication:** ASP.NET Core Identity (Cookie-based)
+- **Database:** Entity Framework Core with SQLite
+- **Styling:** Custom Vanilla CSS (No external CSS frameworks required)
+
+---
+
+## 🚀 Running the Project Locally
+
+To run the project on your local machine, ensure you have the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) installed.
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/isaropesi/cse325.git
+cd cse325/GroupProject
+```
+
+### 2. Build the Application
+Restore dependencies and compile the project:
+```bash
+dotnet build
+```
+
+### 3. Run the Application
+Start the development server. The database (`budget4u.db`) will be automatically created and migrated on startup if it doesn't exist.
+```bash
+dotnet run
+```
+
+### 4. Access the App
+Open your browser and navigate to the URL provided in your terminal (typically `http://localhost:5000` or `https://localhost:5001`).
+
+---
+
+## 📸 Screenshots
+
+*(Add screenshots of your running application here before W07 final submission!)*
+- Landing Page
+- Dashboard
+- Transactions
+- Categories
