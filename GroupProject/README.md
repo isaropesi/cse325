@@ -53,10 +53,13 @@ Open your browser and navigate to the URL provided in your terminal (typically `
 
 ---
 
-## 📸 Screenshots
+## 📖 Basic Start and Use Guide
 
-*(Add screenshots of your running application here before W07 final submission!)*
-- Landing Page
-- Dashboard
-- Transactions
-- Categories
+Once the application is running, follow these steps to get started:
+
+1. **Create an Account:** Click "Get Started" on the landing page to register a new account. Your data is private and tied to your login.
+2. **Setup Categories:** Navigate to the **Categories** tab. Create a few categories for your regular expenses (e.g., "Groceries", "Rent", "Salary"). You can assign a custom color to each.
+3. **Set Budgets:** Still on the Categories page, click "Edit Limit" next to a category to set your maximum allowed spending for the current month.
+4. **Log Transactions:** Navigate to the **Transactions** tab. Add your income and expenses. Make sure to assign expenses to the categories you created.
+5. **View Dashboard:** Head to the **Dashboard** to see your total monthly income, expenses, and net balance. The Budget Progress bars will visually warn you if you are approaching or exceeding your set limits!
+
