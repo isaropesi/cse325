@@ -26,7 +26,7 @@
     <div class="b4u-card" style="flex: 1; min-width: 300px;">
         <div class="b4u-card-title">@(isEditing ? "Edit Category" : "Add New Category")</div>
         
-        <EditForm Model="@currentCategory" OnValidSubmit="SaveCategory" FormName="categoryForm">
+        <EditForm EditContext="@editContext" FormName="categoryForm">
             <AntiforgeryToken />
             <DataAnnotationsValidator />
             
@@ -42,7 +42,7 @@
             </div>
             
             <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                <button type="submit" class="btn-primary-b4u">Save Category</button>
+                <button type="button" class="btn-primary-b4u" @onclick="HandleSaveCategory">Save Category</button>
                 @if (isEditing)
                 {
                     <button type="button" class="btn-outline-b4u" @onclick="CancelEdit">Cancel</button>
@@ -119,6 +119,7 @@
     [SupplyParameterFromForm]
     private Budget4U.Data.Category currentCategory { get; set; }
     
+    private EditContext? editContext;
     private string userId = string.Empty;
     private bool isEditing = false;
     private string? errorMessage;
@@ -132,6 +133,7 @@
         userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
         
         currentCategory ??= new Budget4U.Data.Category();
+        editContext = new EditContext(currentCategory);
 
         if (!string.IsNullOrEmpty(userId))
         {
@@ -144,6 +146,14 @@
     {
         categories = await CategoryService.GetCategoriesAsync(userId);
         budgetLimits = await CategoryService.GetBudgetLimitsAsync(userId, DateTime.Today.Month, DateTime.Today.Year);
+    }
+
+    private async Task HandleSaveCategory()
+    {
+        if (editContext != null && editContext.Validate())
+        {
+            await SaveCategory();
+        }
     }
 
     private async Task SaveCategory()
@@ -164,6 +174,7 @@
             }
 
             currentCategory = new Budget4U.Data.Category { UserId = userId };
+            editContext = new EditContext(currentCategory);
             await LoadData();
         }
         catch (Exception)
@@ -187,6 +198,7 @@
     private void CancelEdit()
     {
         currentCategory = new Budget4U.Data.Category { UserId = userId };
+        editContext = new EditContext(currentCategory);
         isEditing = false;
     }
 
