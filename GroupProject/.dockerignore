@@ -1,0 +1,23 @@
+# Git
+.git
+.gitignore
+
+# Build output
+bin/
+obj/
+
+# Database file (will be created fresh on server)
+*.db
+*.db-wal
+*.db-shm
+
+# macOS
+.DS_Store
+
+# VS / Rider
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
