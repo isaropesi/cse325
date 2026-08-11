@@ -150,9 +150,15 @@
 
     private async Task HandleSaveCategory()
     {
-        if (editContext != null && editContext.Validate())
+        Console.WriteLine($"[DEBUG] HandleSaveCategory called. EditContext is null: {editContext == null}");
+        if (editContext != null)
         {
-            await SaveCategory();
+            var isValid = editContext.Validate();
+            Console.WriteLine($"[DEBUG] EditContext Validate result: {isValid}");
+            if (isValid)
+            {
+                await SaveCategory();
+            }
         }
     }
 

@@ -199,9 +199,15 @@
 
     private async Task HandleSaveTransaction()
     {
-        if (editContext != null && editContext.Validate())
+        Console.WriteLine($"[DEBUG] HandleSaveTransaction called. EditContext is null: {editContext == null}");
+        if (editContext != null)
         {
-            await SaveTransaction();
+            var isValid = editContext.Validate();
+            Console.WriteLine($"[DEBUG] EditContext Validate result: {isValid}");
+            if (isValid)
+            {
+                await SaveTransaction();
+            }
         }
     }
 

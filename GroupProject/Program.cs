@@ -73,13 +73,14 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
 });
 
+app.UseStaticFiles();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseAntiforgery();
 
 app.UseWebSockets();
-app.UseStaticFiles();
 app.MapStaticAssets();
 app.MapRazorPages();
 app.MapRazorComponents<App>()

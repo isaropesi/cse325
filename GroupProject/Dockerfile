@@ -9,6 +9,7 @@ RUN dotnet restore
 # Copy everything else and publish
 COPY . .
 RUN dotnet publish GroupProject.csproj -c Release -o /app/publish --no-restore
+RUN mkdir -p /app/publish/wwwroot/js && cp /app/publish/wwwroot/_framework/blazor.web.js /app/publish/wwwroot/js/blazor.web.js
 
 # ---- Runtime Stage ----
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
