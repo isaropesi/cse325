@@ -41,7 +41,7 @@
     <div class="b4u-card" style="flex: 1; min-width: 320px;">
         <div class="b4u-card-title">@(isEditing ? "Edit Transaction" : "Log Transaction")</div>
         
-        <EditForm Model="@currentTransaction" OnValidSubmit="SaveTransaction">
+        <EditForm Model="@currentTransaction" OnValidSubmit="SaveTransaction" FormName="transactionForm">
             <DataAnnotationsValidator />
             
             <div class="b4u-form-group">
@@ -161,7 +161,10 @@
 @code {
     private List<Budget4U.Data.Transaction>? transactions;
     private List<Budget4U.Data.Category>? categories;
-    private Budget4U.Data.Transaction currentTransaction = new Budget4U.Data.Transaction { Date = DateTime.Today };
+    
+    [SupplyParameterFromForm]
+    private Budget4U.Data.Transaction currentTransaction { get; set; }
+    
     private string userId = string.Empty;
     private bool isEditing = false;
     private string? errorMessage;
@@ -174,6 +177,8 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
         
+        currentTransaction ??= new Budget4U.Data.Transaction { Date = DateTime.Today };
+
         if (!string.IsNullOrEmpty(userId))
         {
             currentTransaction.UserId = userId;

@@ -26,7 +26,7 @@
     <div class="b4u-card" style="flex: 1; min-width: 300px;">
         <div class="b4u-card-title">@(isEditing ? "Edit Category" : "Add New Category")</div>
         
-        <EditForm Model="@currentCategory" OnValidSubmit="SaveCategory">
+        <EditForm Model="@currentCategory" OnValidSubmit="SaveCategory" FormName="categoryForm">
             <DataAnnotationsValidator />
             
             <div class="b4u-form-group">
@@ -114,7 +114,10 @@
 @code {
     private List<Budget4U.Data.Category>? categories;
     private List<Budget4U.Data.BudgetLimit>? budgetLimits;
-    private Budget4U.Data.Category currentCategory = new Budget4U.Data.Category();
+    
+    [SupplyParameterFromForm]
+    private Budget4U.Data.Category currentCategory { get; set; }
+    
     private string userId = string.Empty;
     private bool isEditing = false;
     private string? errorMessage;
@@ -127,6 +130,8 @@
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
         
+        currentCategory ??= new Budget4U.Data.Category();
+
         if (!string.IsNullOrEmpty(userId))
         {
             currentCategory.UserId = userId;
