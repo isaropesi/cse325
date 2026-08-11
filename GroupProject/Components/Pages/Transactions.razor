@@ -25,6 +25,16 @@
     </div>
 </div>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="b4u-card" style="background: #fee2e2; border-color: #fca5a5; margin-bottom: 1rem;" role="alert">
+        <div style="color: #991b1b; display: flex; justify-content: space-between; align-items: center;">
+            <span>@errorMessage</span>
+            <button class="btn-outline-b4u" style="padding: 0.1rem 0.5rem; border-color: #991b1b; color: #991b1b;" @onclick="() => errorMessage = null" aria-label="Dismiss error">Dismiss</button>
+        </div>
+    </div>
+}
+
 <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
     <!-- Add/Edit Form -->
     <div class="b4u-card" style="flex: 1; min-width: 320px;">
@@ -153,6 +163,7 @@
     private Budget4U.Data.Transaction currentTransaction = new Budget4U.Data.Transaction { Date = DateTime.Today };
     private string userId = string.Empty;
     private bool isEditing = false;
+    private string? errorMessage;
     
     private DateTime filterDate = DateTime.Today;
     private decimal monthlyBalance = 0;
@@ -180,19 +191,27 @@
     private async Task SaveTransaction()
     {
         if (string.IsNullOrEmpty(userId)) return;
+        errorMessage = null;
 
-        if (isEditing)
+        try
         {
-            await TransactionService.UpdateTransactionAsync(currentTransaction);
-            isEditing = false;
-        }
-        else
-        {
-            await TransactionService.AddTransactionAsync(currentTransaction);
-        }
+            if (isEditing)
+            {
+                await TransactionService.UpdateTransactionAsync(currentTransaction);
+                isEditing = false;
+            }
+            else
+            {
+                await TransactionService.AddTransactionAsync(currentTransaction);
+            }
 
-        currentTransaction = new Budget4U.Data.Transaction { UserId = userId, Date = filterDate };
-        await LoadData();
+            currentTransaction = new Budget4U.Data.Transaction { UserId = userId, Date = filterDate };
+            await LoadData();
+        }
+        catch (Exception)
+        {
+            errorMessage = "An error occurred while saving the transaction. Please try again.";
+        }
     }
 
     private void EditTransaction(Budget4U.Data.Transaction t)
@@ -218,7 +237,15 @@
 
     private async Task DeleteTransaction(int id)
     {
-        await TransactionService.DeleteTransactionAsync(id, userId);
-        await LoadData();
+        errorMessage = null;
+        try
+        {
+            await TransactionService.DeleteTransactionAsync(id, userId);
+            await LoadData();
+        }
+        catch (Exception)
+        {
+            errorMessage = "An error occurred while deleting the transaction.";
+        }
     }
 }
