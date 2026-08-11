@@ -42,6 +42,7 @@
         <div class="b4u-card-title">@(isEditing ? "Edit Transaction" : "Log Transaction")</div>
         
         <EditForm Model="@currentTransaction" OnValidSubmit="SaveTransaction" FormName="transactionForm">
+            <AntiforgeryToken />
             <DataAnnotationsValidator />
             
             <div class="b4u-form-group">

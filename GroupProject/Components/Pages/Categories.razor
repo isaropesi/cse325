@@ -27,6 +27,7 @@
         <div class="b4u-card-title">@(isEditing ? "Edit Category" : "Add New Category")</div>
         
         <EditForm Model="@currentCategory" OnValidSubmit="SaveCategory" FormName="categoryForm">
+            <AntiforgeryToken />
             <DataAnnotationsValidator />
             
             <div class="b4u-form-group">
